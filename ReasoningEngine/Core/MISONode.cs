@@ -1,5 +1,3 @@
-// File: /home/user/code/reasoning-engine/ReasoningEngine/Core/MISONode.cs
-
 namespace ReasoningEngine
 {
     public class MISONode : Node

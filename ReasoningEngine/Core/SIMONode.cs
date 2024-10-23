@@ -1,3 +1,5 @@
+using System;
+
 namespace ReasoningEngine
 {
     public class SIMONode : Node

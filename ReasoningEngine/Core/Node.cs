@@ -5,7 +5,7 @@ namespace ReasoningEngine
     public class NodeV1 : NodeBase
     {
         public override int Version => 1;
-        public string Content { get; set; }
+        public new string Content { get; set; }
 
         public NodeV1(long id, string content) : base(id, NodeType.Standard)
         {
@@ -21,7 +21,7 @@ namespace ReasoningEngine
     public class NodeV2 : NodeBase
     {
         public override int Version => 2;
-        public string Content { get; set; }
+        public new string Content { get; set; }
 
         public NodeV2(long id, string content, NodeType type = NodeType.Standard) : base(id, type)
         {
