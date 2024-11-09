@@ -119,16 +119,24 @@ namespace ReasoningEngineTests {
         {
             var distribution = new ProbabilityDistribution(DomainType.Continuous);
             
-            // Create two ranges with a small gap
+            // Create two ranges with small gap
             distribution.AddRange(0, 1, 0.5);
             distribution.AddRange(1 + 2 * EPSILON, 2, 0.5);
 
-            // Test point in the gap
-            var gapPoint = 1 + EPSILON;
+            // Test points in the gap
+            var gapPoint1 = 1 + 0.5 * EPSILON;     // Should be in first range (closer to 1)
+            var gapPoint2 = 1 + 1.5 * EPSILON;     // Should be in second range (closer to 1+2*EPSILON)
+            var gapMidpoint = 1 + EPSILON;         // Should be in first range (equidistant, prefer lower range)
             
-            // Point should be assigned to the closest range
-            Assert.That(distribution.GetContainingRange(gapPoint), Is.EqualTo(0), 
-                "Point should be assigned to first range as it's closer to its boundary");
+            Assert.Multiple(() =>
+            {
+                Assert.That(distribution.GetContainingRange(gapPoint1), Is.EqualTo(0), 
+                    "Point closer to first range's upper bound");
+                Assert.That(distribution.GetContainingRange(gapPoint2), Is.EqualTo(1), 
+                    "Point closer to second range's lower bound");
+                Assert.That(distribution.GetContainingRange(gapMidpoint), Is.EqualTo(0), 
+                    "Equidistant point should go to lower range");
+            });
         }
 
         [Test]
