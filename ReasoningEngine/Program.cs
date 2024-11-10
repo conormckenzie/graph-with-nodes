@@ -13,7 +13,7 @@ namespace ReasoningEngine
             new MenuItem("Run Setup", "#RNKA1C#", "setup"),
             new MenuItem("Graph Operations", "#D7SFN1#", "graph_operations"),
             new MenuItem("Debug Options", "#E1QTUA#", "debug_options"),
-            new MenuItem("Start Web Server", "#WEB1#", "start_web_server"), // New menu item
+            new MenuItem("Start Web Server", "#WEB000#", "start_web_server"), // New menu item
         };
 
         static void Main(string[] args)
@@ -65,7 +65,7 @@ namespace ReasoningEngine
                         case "debug_options":
                             DebugOptions.ShowDebugOptionsMenu();
                             break;
-                        case "start_web_server": // New case for starting the web server
+                        case "start_web_server":
                             var webServer = new WebServer(commandProcessor);
                             webServer.Start();
                             break;
