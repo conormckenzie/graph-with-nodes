@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System;
 using System.Diagnostics;
@@ -25,76 +25,108 @@ namespace ReasoningEngine
 
         public void Start()
         {
-            var host = new WebHostBuilder()
-                .UseKestrel()
-                .ConfigureServices(services => services.AddRouting())
-                .Configure(app =>
+            var builder = WebApplication.CreateBuilder();
+
+            builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
                 {
-                    app.UseRouting();
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                    c.RoutePrefix = string.Empty;
+                });
+            }
 
-                    app.UseEndpoints(endpoints =>
-                    {
-                        endpoints.MapGet("/api/command/{command}/{payload}", async context =>
-                        {
-                            try 
-                            {
-                                var command = context.Request.RouteValues["command"]?.ToString();
-                                var payload = context.Request.RouteValues["payload"]?.ToString();
+            app.MapPost("/api/node_query", async (NodeIdPayload payload) => 
+            {
+                DebugWriter.DebugWriteLine("#NQ001#", $"Received request to query node with ID: {payload.Id}");
+                var result = await Task.FromResult(commandProcessor.ProcessCommand("node_query", payload.Id.ToString()));
+                DebugWriter.DebugWriteLine("#NQ002#", $"Result of node query command: {result}");
+                return result;
+            });
 
-                                if (string.IsNullOrEmpty(command))
-                                {
-                                    context.Response.StatusCode = 400;
-                                    await context.Response.WriteAsync("Command is required");
-                                    return;
-                                }
+            app.MapPost("/api/outgoing_edge_query", async (NodeIdPayload payload) => 
+            {
+                DebugWriter.DebugWriteLine("#OEQ001#", $"Received request to query outgoing edges for node ID: {payload.Id}");
+                var result = await Task.FromResult(commandProcessor.ProcessCommand("outgoing_edge_query", payload.Id.ToString()));
+                DebugWriter.DebugWriteLine("#OEQ002#", $"Result of outgoing edge query command: {result}");
+                return result;
+            });
 
-                                if (payload == null)
-                                {
-                                    context.Response.StatusCode = 400;
-                                    await context.Response.WriteAsync("Payload is required");
-                                    return;
-                                }
+            app.MapPost("/api/incoming_edge_query", async (NodeIdPayload payload) => 
+            {
+                DebugWriter.DebugWriteLine("#IEQ001#", $"Received request to query incoming edges for node ID: {payload.Id}");
+                var result = await Task.FromResult(commandProcessor.ProcessCommand("incoming_edge_query", payload.Id.ToString()));
+                DebugWriter.DebugWriteLine("#IEQ002#", $"Result of incoming edge query command: {result}");
+                return result;
+            });
 
-                                var result = await commandProcessor.ProcessCommandAsync(command, payload);
-                                await context.Response.WriteAsync(result);
-                            }
-                            catch (Exception ex)
-                            {
-                                context.Response.StatusCode = 500;
-                                await context.Response.WriteAsync($"Internal server error: {ex.Message}");
-                            }
-                        });
+            app.MapPost("/api/add_node", async (NodePayload payload) => 
+            {
+                DebugWriter.DebugWriteLine("#AN001#", $"Received request to add node with ID: {payload.Id} and Content: {payload.Content}");
+                var result = await Task.FromResult(commandProcessor.ProcessCommand("add_node", $"{payload.Id.ToString()}|{payload.Content}"));
+                DebugWriter.DebugWriteLine("#AN002#", $"Result of add node command: {result}");
+                return result;
+            });
 
-                        endpoints.MapGet("/api/health", async context =>
-                        {
-                            await context.Response.WriteAsync("OK");
-                        });
+            app.MapPost("/api/delete_node", async (NodeIdPayload payload) => 
+            {
+                DebugWriter.DebugWriteLine("#DN001#", $"Received request to delete node with ID: {payload.Id}");
+                var result = await Task.FromResult(commandProcessor.ProcessCommand("delete_node", payload.Id.ToString()));
+                DebugWriter.DebugWriteLine("#DN002#", $"Result of delete node command: {result}");
+                return result;
+            });
 
-                        endpoints.MapGet("/api/debug", async context =>
-                        {
-                            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "ReasoningEngine", "debug.html");
-                            context.Response.ContentType = "text/html";
-                            try
-                            {
-                                await context.Response.SendFileAsync(filePath);
-                            }
-                            catch (Exception ex)
-                            {
-                                context.Response.StatusCode = 500;
-                                await context.Response.WriteAsync($"Error serving debug.html: {ex.Message}");
-                            }
-                        });
-                    });
-                })
-                .UseUrls("http://localhost:5000")
-                .Build();
+            app.MapPost("/api/edit_node", async (NodePayload payload) => 
+            {
+                DebugWriter.DebugWriteLine("#EN001#", $"Received request to edit node with ID: {payload.Id} and Content: {payload.Content}");
+                var result = await Task.FromResult(commandProcessor.ProcessCommand("edit_node", $"{payload.Id.ToString()}|{payload.Content}"));
+                DebugWriter.DebugWriteLine("#EN002#", $"Result of edit node command: {result}");
+                return result;
+            });
+
+            app.MapPost("/api/add_edge", async (EdgePayload payload) => 
+            {
+                DebugWriter.DebugWriteLine("#AE001#", $"Received request to add edge from Source ID: {payload.SourceId} to Dest ID: {payload.DestId} with Weight: {payload.Weight} and Content: {payload.Content}");
+                var result = await Task.FromResult(commandProcessor.ProcessCommand("add_edge", $"{payload.SourceId.ToString()}|{payload.DestId.ToString()}|{payload.Weight}|{payload.Content}"));
+                DebugWriter.DebugWriteLine("#AE002#", $"Result of add edge command: {result}");
+                return result;
+            });
+
+            app.MapPost("/api/delete_edge", async (EdgeIdPayload payload) => 
+            {
+                DebugWriter.DebugWriteLine("#DE001#", $"Received request to delete edge from Source ID: {payload.SourceId} to Dest ID: {payload.DestId}");
+                var result = await Task.FromResult(commandProcessor.ProcessCommand("delete_edge", $"{payload.SourceId.ToString()}|{payload.DestId.ToString()}"));
+                DebugWriter.DebugWriteLine("#DE002#", $"Result of delete edge command: {result}");
+                return result;
+            });
+
+            app.MapPost("/api/edit_edge", async (EdgePayload payload) => 
+            {
+                DebugWriter.DebugWriteLine("#EE001#", $"Received request to edit edge from Source ID: {payload.SourceId} to Dest ID: {payload.DestId} with Weight: {payload.Weight} and Content: {payload.Content}");
+                var result = await Task.FromResult(commandProcessor.ProcessCommand("edit_edge", $"{payload.SourceId.ToString()}|{payload.DestId.ToString()}|{payload.Weight}|{payload.Content}"));
+                DebugWriter.DebugWriteLine("#EE002#", $"Result of edit edge command: {result}");
+                return result;
+            });
+
+            app.MapGet("/api/health", () => 
+            {
+                DebugWriter.DebugWriteLine("#HC001#", "Health check requested.");
+                return Results.Ok(new { status = "Healthy" });
+            });
 
             DebugWriter.DebugWriteLine("#WEB001#", "Starting web server on http://localhost:5000");
-            OpenBrowser("http://localhost:5000/api/debug");
-            host.Run();
+            OpenBrowser("http://localhost:5000");
+            app.Run("http://localhost:5000");
         }
 
-        private void OpenBrowser(string url)
+        private static void OpenBrowser(string url)
         {
             try
             {
@@ -121,5 +153,30 @@ namespace ReasoningEngine
                 Console.WriteLine($"Error: {ex.Message}");
             }
         }
+    }
+
+    public class NodeIdPayload
+    {
+        public int Id { get; set; }
+    }
+
+    public class NodePayload
+    {
+        public int Id { get; set; }
+        public string Content { get; set; }
+    }
+
+    public class EdgePayload
+    {
+        public int SourceId { get; set; }
+        public int DestId { get; set; }
+        public string Weight { get; set; }
+        public string Content { get; set; }
+    }
+
+    public class EdgeIdPayload
+    {
+        public int SourceId { get; set; }
+        public int DestId { get; set; }
     }
 }
