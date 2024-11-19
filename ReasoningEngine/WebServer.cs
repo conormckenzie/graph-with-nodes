@@ -205,7 +205,7 @@ namespace ReasoningEngine
             app.MapGet("/api/health", () =>
             {
                 DebugWriter.DebugWriteLine("#HC001#", "Health check requested");
-                return new ApiResponse<string> { Success = true, Data = "OK" };
+                return Results.Ok(new ApiResponse<string> { Success = true, Data = "OK" });
             })
             .WithMetadata(new SwaggerOperationAttribute("Health Check", "Returns OK if the service is healthy"));
 
