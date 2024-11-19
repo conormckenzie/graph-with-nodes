@@ -13,6 +13,7 @@ namespace ReasoningEngine
             new MenuItem("Run Setup", "#RNKA1C#", "setup"),
             new MenuItem("Graph Operations", "#D7SFN1#", "graph_operations"),
             new MenuItem("Debug Options", "#E1QTUA#", "debug_options"),
+            new MenuItem("Start Web Server", "#WEB000#", "start_web_server"), // New menu item
         };
 
         static void Main(string[] args)
@@ -63,6 +64,10 @@ namespace ReasoningEngine
                             break;
                         case "debug_options":
                             DebugOptions.ShowDebugOptionsMenu();
+                            break;
+                        case "start_web_server":
+                            var webServer = new WebServer(commandProcessor);
+                            webServer.Start();
                             break;
                         default:
                             DebugWriter.DebugWriteLine("#00INV1#", "Invalid option. Please try again.");

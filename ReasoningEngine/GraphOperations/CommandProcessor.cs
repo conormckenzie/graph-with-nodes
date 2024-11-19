@@ -15,7 +15,7 @@ namespace ReasoningEngine.GraphAccess
             this.graphFileManager = graphFileManager;
         }
 
-        public string ProcessCommand(string command, string payload)
+        public virtual string ProcessCommand(string command, string payload)
         {
             switch (command.ToLower())
             {
@@ -42,7 +42,7 @@ namespace ReasoningEngine.GraphAccess
             }
         }
 
-        public async Task<string> ProcessCommandAsync(string command, string payload)
+        public virtual async Task<string> ProcessCommandAsync(string command, string payload)
         {
             return await Task.Run(() => ProcessCommand(command, payload));
         }
