@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Debugging Interface</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .command-button { margin: 5px; }
+        .command-input { margin: 5px; }
+        .error { color: red; }
+        #response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debugging Interface</h1>
+    <div>
+        <h2>Node Commands</h2>
+        
+        <div>
+            <input type="text" id="nodeQueryId" class="command-input" placeholder="Node ID" />
+            <button class="command-button" onclick="validateAndSend('node_query', [document.getElementById('nodeQueryId').value])">Query Node</button>
+        </div>
+
+        <div>
+            <input type="text" id="addNodeId" class="command-input" placeholder="ID" />
+            <input type="text" id="addNodeContent" class="command-input" placeholder="Content" />
+            <button class="command-button" onclick="validateAndSend('add_node', [document.getElementById('addNodeId').value, document.getElementById('addNodeContent').value])">Add Node</button>
+        </div>
+
+        <div>
+            <input type="text" id="deleteNodeId" class="command-input" placeholder="Node ID" />
+            <button class="command-button" onclick="validateAndSend('delete_node', [document.getElementById('deleteNodeId').value])">Delete Node</button>
+        </div>
+
+        <div>
+            <input type="text" id="editNodeId" class="command-input" placeholder="ID" />
+            <input type="text" id="editNodeContent" class="command-input" placeholder="New Content" />
+            <button class="command-button" onclick="validateAndSend('edit_node', [document.getElementById('editNodeId').value, document.getElementById('editNodeContent').value])">Edit Node</button>
+        </div>
+
+        <h2>Edge Commands</h2>
+
+        <div>
+            <input type="text" id="outgoingEdgeNodeId" class="command-input" placeholder="Node ID" />
+            <button class="command-button" onclick="validateAndSend('outgoing_edge_query', [document.getElementById('outgoingEdgeNodeId').value])">Outgoing Edge Query</button>
+        </div>
+
+        <div>
+            <input type="text" id="incomingEdgeNodeId" class="command-input" placeholder="Node ID" />
+            <button class="command-button" onclick="validateAndSend('incoming_edge_query', [document.getElementById('incomingEdgeNodeId').value])">Incoming Edge Query</button>
+        </div>
+
+        <div>
+            <input type="text" id="addEdgeFromId" class="command-input" placeholder="From ID" />
+            <input type="text" id="addEdgeToId" class="command-input" placeholder="To ID" />
+            <input type="text" id="addEdgeWeight" class="command-input" placeholder="Weight" />
+            <input type="text" id="addEdgeContent" class="command-input" placeholder="Content" />
+            <button class="command-button" onclick="validateAndSend('add_edge', [document.getElementById('addEdgeFromId').value, document.getElementById('addEdgeToId').value, document.getElementById('addEdgeWeight').value, document.getElementById('addEdgeContent').value])">Add Edge</button>
+        </div>
+
+        <div>
+            <input type="text" id="deleteEdgeFromId" class="command-input" placeholder="From ID" />
+            <input type="text" id="deleteEdgeToId" class="command-input" placeholder="To ID" />
+            <button class="command-button" onclick="validateAndSend('delete_edge', [document.getElementById('deleteEdgeFromId').value, document.getElementById('deleteEdgeToId').value])">Delete Edge</button>
+        </div>
+
+        <div>
+            <input type="text" id="editEdgeFromId" class="command-input" placeholder="From ID" />
+            <input type="text" id="editEdgeToId" class="command-input" placeholder="To ID" />
+            <input type="text" id="editEdgeNewWeight" class="command-input" placeholder="New Weight" />
+            <input type="text" id="editEdgeNewContent" class="command-input" placeholder="New Content" />
+            <button class="command-button" onclick="validateAndSend('edit_edge', [document.getElementById('editEdgeFromId').value, document.getElementById('editEdgeToId').value, document.getElementById('editEdgeNewWeight').value, document.getElementById('editEdgeNewContent').value])">Edit Edge</button>
+        </div>
+    </div>
+    <div id='response'></div>
+    <script>
+        function validateAndSend(command, params) {
+            let errorMessages = [];
+
+            switch (command) {
+                case 'node_query':
+                    if (!params[0].trim()) errorMessages.push("Error: Node ID is required for querying.");
+                    break;
+                case 'add_node':
+                    if (!params[0].trim()) errorMessages.push("Error: ID is required for adding a node.");
+                    if (!params[1].trim()) errorMessages.push("Error: Content is required for adding a node.");
+                    break;
+                case 'delete_node':
+                    if (!params[0].trim()) errorMessages.push("Error: Node ID is required for deleting.");
+                    break;
+                case 'edit_node':
+                    if (!params[0].trim()) errorMessages.push("Error: ID is required for editing a node.");
+                    if (!params[1].trim()) errorMessages.push("Error: New content is required for editing a node.");
+                    break;
+                case 'outgoing_edge_query':
+                    if (!params[0].trim()) errorMessages.push("Error: Node ID is required for outgoing edge query.");
+                    break;
+                case 'incoming_edge_query':
+                    if (!params[0].trim()) errorMessages.push("Error: Node ID is required for incoming edge query.");
+                    break;
+                case 'add_edge':
+                    if (!params[0].trim()) errorMessages.push("Error: From ID is required for adding an edge.");
+                    if (!params[1].trim()) errorMessages.push("Error: To ID is required for adding an edge.");
+                    if (!params[2].trim()) errorMessages.push("Error: Weight is required for adding an edge.");
+                    if (!params[3].trim()) errorMessages.push("Error: Content is required for adding an edge.");
+                    break;
+                case 'delete_edge':
+                    if (!params[0].trim()) errorMessages.push("Error: From ID is required for deleting an edge.");
+                    if (!params[1].trim()) errorMessages.push("Error: To ID is required for deleting an edge.");
+                    break;
+                case 'edit_edge':
+                    if (!params[0].trim()) errorMessages.push("Error: From ID is required for editing an edge.");
+                    if (!params[1].trim()) errorMessages.push("Error: To ID is required for editing an edge.");
+                    if (!params[2].trim()) errorMessages.push("Error: New weight is required for editing an edge.");
+                    if (!params[3].trim()) errorMessages.push("Error: New content is required for editing an edge.");
+                    break;
+            }
+
+            if (errorMessages.length > 0) {
+                document.getElementById('response').innerText = errorMessages.join('\n');
+                return;
+            }
+
+            const payload = params.join('|');
+            sendCommand(command, payload);
+        }
+
+        async function sendCommand(command, payload) {
+            const response = await fetch(`/api/command/${command}/${payload}`);
+            const text = await response.text();
+            document.getElementById('response').innerText = text;
+        }
+    </script>
+</body>
+</html>
