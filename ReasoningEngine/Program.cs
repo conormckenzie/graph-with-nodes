@@ -3,6 +3,7 @@ using DotNetEnv;
 using ReasoningEngine.GraphFileHandling;
 using ReasoningEngine.GraphAccess;
 using DebugUtils;
+using System.IO;
 
 namespace ReasoningEngine
 {
@@ -13,12 +14,32 @@ namespace ReasoningEngine
             new MenuItem("Run Setup", "#RNKA1C#", "setup"),
             new MenuItem("Graph Operations", "#D7SFN1#", "graph_operations"),
             new MenuItem("Debug Options", "#E1QTUA#", "debug_options"),
-            new MenuItem("Start Web Server", "#WEB000#", "start_web_server"), // New menu item
+            new MenuItem("Start Web Server", "#WEB000#", "start_web_server"),
         };
 
         static void Main(string[] args)
         {
-            Env.Load();
+            // Try current directory first
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string envPath = Path.Combine(currentDirectory, ".env");
+            
+            // If not found, try looking up from executable location
+            if (!File.Exists(envPath))
+            {
+                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string solutionDirectory = Path.GetFullPath(Path.Combine(baseDirectory, "../../../../"));
+                envPath = Path.Combine(solutionDirectory, ".env");
+            }
+            
+            DebugWriter.DebugWriteLine("#ENV001#", $"Looking for .env file at: {envPath}");
+            
+            if (!File.Exists(envPath))
+            {
+                throw new Exception($".env file not found at {envPath}. Please ensure the .env file exists in the project root directory.");
+            }
+
+            Env.Load(envPath);
+            DebugWriter.DebugWriteLine("#ENV002#", "Loaded .env file successfully");
 
             string dataFolderPath = Environment.GetEnvironmentVariable("DATA_FOLDER_PATH") 
                                     ?? throw new Exception("DATA_FOLDER_PATH is not set in the environment variables.");
